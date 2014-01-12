@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Linq;
 
-public class Camera_Related_Functions : MonoBehaviour {
+public class Camera_Related_Functions : MonoBehaviour
+{
 	
 	//values that are used for calculation
 	private float heightWanted;
@@ -21,11 +22,12 @@ public class Camera_Related_Functions : MonoBehaviour {
 	private Vector3 targetAdjustedPosition;
 	private float r;
 	private float t;
+	private float newr;
+	private float newt;
 	private float a;
 	private float b;
 	
-	
-	public int moveCamera(int CamNum, Transform target, bool doZoom, float zoomStep, float zoomSpeed, float min, float max, float time,
+	public int moveCamera (int CamNum, Transform target, bool doZoom, float zoomStep, float zoomSpeed, float min, float max, float time,
 		Transform _myTransform, bool Getswap, List<Transform> spheres, bool smooth, float damping, bool bewegen, float xspeed,
 		float yspeed, float factor, bool manualcamera)
 	{		
@@ -49,12 +51,11 @@ public class Camera_Related_Functions : MonoBehaviour {
 		}
 		
 		
-		// DO NOT KNOW THE FUNCTION OF THIS !!!!!!
-		// Set the camera position reference.
-		targetAdjustedPosition = rotationResult * zoomResult;
-		if(Getswap){
+		//To make sure that target can be selected.
+		
+		if (Getswap) {
+			targetAdjustedPosition = rotationResult * zoomResult;
 			_myTransform.position = target.position + targetAdjustedPosition;
-			
 			// Face the desired position.
 			_myTransform.LookAt (target);
 		}
@@ -76,7 +77,7 @@ public class Camera_Related_Functions : MonoBehaviour {
 			}
 		}
 		
-		//private movement
+		//private rotation of the camera
 		if (bewegen) {
 			if (Input.GetKey (KeyCode.A))
 				r -= xspeed * factor;
@@ -86,36 +87,38 @@ public class Camera_Related_Functions : MonoBehaviour {
 				t -= yspeed * factor;
 			else if (Input.GetKey (KeyCode.S))
 				t += yspeed * factor;
-
+			
+			t = Mathf.Clamp (t, -90, 35);
 			
 			Quaternion gedoe = Quaternion.Euler (t, r, 0);
 		
 			_myTransform.rotation = gedoe;	
 		}	
 		
-		if (manualcamera){
-			if(Input.GetKey(KeyCode.DownArrow))
-				_myTransform.position -= _myTransform.forward*factor*xspeed;
-			if(Input.GetKey(KeyCode.UpArrow))
-				_myTransform.position += _myTransform.forward*factor*xspeed;
-			if(Input.GetKey(KeyCode.LeftArrow))
-				_myTransform.position -= _myTransform.right*factor*yspeed;
-			if(Input.GetKey(KeyCode.RightArrow))
-				_myTransform.position += _myTransform.right*factor*yspeed;
+// to be able to move the camera
+		if (manualcamera) {
+			if (Input.GetKey (KeyCode.DownArrow)) {
+				_myTransform.position -= _myTransform.forward * factor * xspeed;
+			}
+			if (Input.GetKey (KeyCode.UpArrow)) {
+				_myTransform.position += _myTransform.forward * factor * xspeed;
+			}
+			if (Input.GetKey (KeyCode.LeftArrow)) {
+				_myTransform.position -= _myTransform.right * factor * yspeed;
+			}
+			if (Input.GetKey (KeyCode.RightArrow)) {
+				_myTransform.position += _myTransform.right * factor * yspeed;
+			}
+			if (Input.GetKey (KeyCode.LeftControl)) {
+				_myTransform.position -= _myTransform.up * factor * yspeed;
+			}
+			if (Input.GetKey (KeyCode.LeftAlt)) {	
+				_myTransform.position += _myTransform.up * factor * yspeed;
+			}
 
-			if (Input.GetKey (KeyCode.A)){
-				r -= xspeed * factor;
-			}
-			else if (Input.GetKey (KeyCode.D)){
-				r += xspeed * factor;
-			}
+
 		}
 
-			Quaternion gedoe2 = Quaternion.Euler (0, r, 0);
-
-			_myTransform.rotation = gedoe2;
-
-		
 		return CamNum;
 	}
 }
