@@ -18,7 +18,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 	
 	// These are local variables, made and used within this class only.
 	public List<Transform> spheres = new List<Transform> ();
-	private int index = 1;
+	public int index = 1;
 	private int closetoend = 0;
 	private float startTime;
 	private bool setTime = false;
@@ -44,10 +44,18 @@ public class Movement_Related_Functions : MonoBehaviour {
 			if(pedestrians == false)
 			{
 				GameObject sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+
+				if (counter < numberOfPedestrians /2){
+					sphere.renderer.material.color = Color.blue;
+				}
+				else{
+					sphere.renderer.material.color = Color.red;
+				}
+
 				sphere.AddComponent<Rigidbody> ();
-				sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [counter, 0]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [counter + numberOfPedestrians, 0]));
+				sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [counter, 0]), Convert.ToInt32 (1.0), Convert.ToInt32 (positions [counter + numberOfPedestrians, 0]));
 				spheres.Add (sphere.transform);
-			}
+				}
 			
 			else {
 				if (counter < numberOfPedestrians / 2) {	
@@ -66,7 +74,8 @@ public class Movement_Related_Functions : MonoBehaviour {
 		return spheres;
 	}
 	
-	public int moveGameObjects(float threshold, float threshold2, float time, int CamNum, bool resetCounter)
+	public int moveGameObjects(float threshold, float threshold2, float time, int CamNum, bool resetCounter, List<Transform> spheres, 
+	                           int numberOfPedestrians, int numberOfSteps, double[,] positions, bool pedestrians)
 	{
 		if (setTime == false)
 		{
@@ -92,13 +101,13 @@ public class Movement_Related_Functions : MonoBehaviour {
 				
 				Vector3 tempStart = sphere.transform.position;
 				Vector3 tempNext = sphere.transform.position;
-				
+
 				//For Rotation
 				Vector3 nextlook = sphere.transform.position; // vector variable used to store next position to look at
-				
+
 				//For Rotation
 				Quaternion currotation = sphere.transform.localRotation; // saves the current rotation position
-				
+
 				// Added -3 for the rotation (Means we wont need a separate function for movement and rotation)
 				if (index <= numberOfSteps-3) 
 				{
@@ -106,7 +115,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 					tempStart.z = (float)positions[(counter + numberOfPedestrians), index - 1];
 					tempNext.x = (float)positions [counter, index];
 					tempNext.z = (float)positions [(counter + numberOfPedestrians), index];	
-					
+
 					if(Math.Abs(tempNext.x-tempStart.x) > 2.0f)
 					{
 						Destroy(spheres[counter].gameObject);						
@@ -171,8 +180,14 @@ public class Movement_Related_Functions : MonoBehaviour {
 					{
 						if(pedestrians == false){
 							GameObject sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+							if (i < numberOfPedestrians /2){
+								sphere.renderer.material.color = Color.blue;
+							}
+							else{
+								sphere.renderer.material.color = Color.red;
+							}
 							sphere.AddComponent<Rigidbody> ();
-							sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
+							sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (1.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
 							spheres[i] = sphere.transform;
 						}
 						else{
