@@ -42,6 +42,7 @@ public partial class Combined_Code_Version_1 : MonoBehaviour
 				spheres = initializer.instantiatePedestrians (prefabBlue, prefabRed, rotationSpeed);
 				instantiateCameras ();
 				simulation = true;
+				finished = false;
 
 				numberOfPedestrians = (positions.GetLength (0)) / 2;
 				numberOfSteps = positions.GetLength (1);
@@ -70,18 +71,19 @@ public partial class Combined_Code_Version_1 : MonoBehaviour
 				_myTransform.position = new Vector3 (10, 2, 10);
 				
 				// Starting angle of the new camera
-				_myTransform.rotation = Quaternion.Euler (0, 0, 0);
+				_myTransform.LookAt(new Vector3(50,0,12));
 		}
 
 		void Update ()
 		{
 
 				if (simulation) {
-						bool finished = false; // finished must be true if the simulation has ended!!!
 						if (finished) {
+
 								if (EditorUtility.DisplayDialog ("Simulation has finished", "The simulation is finished. If you want to replay the simulation, click Replay. " +
 										"If you want to go back to the main menu, click Home", "Replay", "Home")) {
 										resetCounter = true;
+										finished = false;
 								} else {
 										stopSimulation ();
 								}
@@ -91,9 +93,13 @@ public partial class Combined_Code_Version_1 : MonoBehaviour
 								// In the following line the position of each gameObject is updated
 								CamNum = movementClass.moveGameObjects (threshold, threshold2, time, CamNum, resetCounter, spheres, 
 				                                        numberOfPedestrians, numberOfSteps, positions, pedestrians);
-
-
-
+								
+								
+								if (CamNum == numberOfPedestrians) {
+										finished = true;
+										CamNum = 0;
+								}
+				
 								// Resets the reset boolean. If button reset is pressed then the boolean is set to true and the index will be set at 
 								// 1. This needs to occur once so after each movement update, the boolean needs to be given the value false. Only when
 								// the button is pressed should the animation reset. If this loop is left out, then the animation will continue to 
@@ -103,16 +109,19 @@ public partial class Combined_Code_Version_1 : MonoBehaviour
 								}
 				
 								// Within this function the entire camera movement is dealt with. 
-								target = spheres [CamNum];	
+								Transform target = spheres [CamNum];	
 
 								CamNum = cameraClass.moveCamera (CamNum, target, doZoom, zoomStep, zoomSpeed, min, max, time, _myTransform, Getswap, 
 				                                 spheres, smooth, damping, bewegen, xspeed, yspeed, factor, manualcamera, point);
+								
+
+						
 						}
 				}
 
 				if (geometry) {
-					float time = Time.time;
-					cameraClass.geometryCamera(doZoom, zoomStep, zoomSpeed, min, max, time, _myTransform, smooth, damping, bewegen, 
+						float time = Time.time;
+						cameraClass.geometryCamera (doZoom, zoomStep, zoomSpeed, min, max, time, _myTransform, smooth, damping, bewegen, 
 			                           xspeed, yspeed, factor, manualcamera, point);
 		
 				}
@@ -188,9 +197,10 @@ public partial class Combined_Code_Version_1 : MonoBehaviour
 				// reset
 				if (manualcamera) {
 						if (GUI.Button (new Rect (10, 80, 50, 50), "reset")) {
-								//resetting the postion
-								_myTransform.rotation = Quaternion.Euler (90, 0, 0);
-								_myTransform.position = new Vector3 (10, 2, 10);
+				// Resetting the camera postion
+				_myTransform.position = new Vector3 (10.0f, 2.0f, 10.0f);
+								// Resetting the camera angle
+				_myTransform.LookAt (new Vector3(50,0,12));
 						}	
 				}
 		}
@@ -252,8 +262,27 @@ public partial class Combined_Code_Version_1 : MonoBehaviour
 
 		void stopSimulation ()
 		{
-				// all objects must be destroyed!!!
+				for (int i = 0; i < numberOfPedestrians; i++) {
+						if (spheres [i]) {
+								Destroy (spheres [i].gameObject);
+						}
+				}
+				destroyFunction ("InteriorWall");
+				destroyFunction ("ExteriorWall");
+				destroyFunction ("Obstacle");
+				destroyFunction ("Floor");
+				resetCounter = true;
+				finished = false;
 				simulation = false;
 		}
-
+	
+		void destroyFunction (String tag)
+		{
+				GameObject[] gameObjects = GameObject.FindGameObjectsWithTag (tag);
+		
+				for (var i = 0; i < gameObjects.Length; i ++) {
+						Destroy (gameObjects [i]);
+				}
+		}
+	
 }

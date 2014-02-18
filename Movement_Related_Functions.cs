@@ -109,7 +109,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 				Quaternion currotation = sphere.transform.localRotation; // saves the current rotation position
 
 				// Added -3 for the rotation (Means we wont need a separate function for movement and rotation)
-				if (index <= numberOfSteps-3) 
+				if (index <= numberOfSteps-4) 
 				{
 					tempStart.x = (float)positions[counter, index - 1];
 					tempStart.z = (float)positions[(counter + numberOfPedestrians), index - 1];
@@ -186,22 +186,39 @@ public class Movement_Related_Functions : MonoBehaviour {
 							else{
 								sphere.renderer.material.color = Color.red;
 							}
+
 							sphere.AddComponent<Rigidbody> ();
 							sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (1.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
 							spheres[i] = sphere.transform;
 						}
 						else{
-							GameObject sphere = (GameObject)Instantiate (prefabBlue);
-							sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
-							spheres[i] = sphere.transform;
+							if (i < numberOfPedestrians / 2) {	
+								GameObject sphere =(GameObject)Instantiate (prefabBlue);
+								sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
+								spheres[i] = sphere.transform;
+							}
+								else{
+								GameObject sphere = (GameObject)Instantiate (prefabRed);
+								sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
+								spheres[i] = sphere.transform;
+							}
+								
+
+							}
 						}
 					}
 				}
 			}
-		}
 		
 		closetoend = 0;
-		return CamNum;
+		if (index > numberOfSteps - 4) 
+		{
+			return numberOfPedestrians;
+		} 
+		else 
+		{
+			return CamNum;
+		}
 	}
 
 }

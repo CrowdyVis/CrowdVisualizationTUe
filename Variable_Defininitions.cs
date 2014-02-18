@@ -39,6 +39,7 @@ public partial class Combined_Code_Version_1 : MonoBehaviour
 	public int CamNum;
 	public int MaxCam = 1 ;
 	bool resetCounter = false;
+	bool finished;
 	
 	// GameObject Movement
 	float startTime;
@@ -50,6 +51,9 @@ public partial class Combined_Code_Version_1 : MonoBehaviour
 	private Camera_Related_Functions cameraClass;
 	
 	// Camera Initialisation
+	private Vector3 resetTarget = new Vector3 (40.0f, 0.0f, 15.0f);
+	private Vector3 relCameraPosition;
+	private Quaternion lookAtRotation;
 	public bool doZoom = true;
 	
 	// Camera target to look at.

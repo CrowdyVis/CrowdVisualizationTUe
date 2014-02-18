@@ -18,7 +18,11 @@ public class Camera_Related_Functions : MonoBehaviour
 	
 		// Result vectors.
 		private Vector3 zoomResult;
-		private Quaternion rotationResult;
+		private Vector3 startingOffset = new Vector3 (3, 2, 3);
+		private Vector3 relCameraPosition;
+		private Quaternion lookAtRotation;
+		private Quaternion additionalRotation;
+		private Vector3 additionalOffset;
 		private Vector3 targetAdjustedPosition;
 		private float r;
 		private float t;
@@ -53,60 +57,56 @@ public class Camera_Related_Functions : MonoBehaviour
 		
 		
 				//To make sure that target can be selected.
-		
 				if (Getswap) {
-						targetAdjustedPosition = rotationResult * zoomResult;
-						_myTransform.position = target.position + targetAdjustedPosition;
-						// Face the desired position.
-						_myTransform.LookAt (target);
-				}
-		
-				//camera swap	
-				if (Getswap == true) {
-						target = spheres [CamNum];
-				}	
+						
+						// Obtains the position of the pedestrian you are currently following
+						Vector3 targetPosition = target.position;
+						
+						// Creates an offset between the camera and the pedestrian being followed and applies this to the camera.
+						startingOffset = startingOffset + zoomResult;
+						_myTransform.position = target.position + startingOffset;
 
-				if (Getswap) {
-						if (target) {
-								//initialising the smoothing
-								if (smooth) {
-										// Look at and dampen the rotation
-										var rotation = Quaternion.LookRotation (target.position - _myTransform.position);
-										_myTransform.rotation = Quaternion.Slerp (_myTransform.rotation, rotation, time * damping);
-								} else {
-										// Just lookat
-										_myTransform.LookAt (target);
-								}
+						if (Input.GetKey (KeyCode.A)) {
+								
+								// Will create a new offset, using the current offset and multiplying this by a rotation around the focus
+								// of this offset, in this case the pedestrian. The camera position is then updated to hold this position.
+								additionalRotation = Quaternion.AngleAxis (1, Vector3.up);
+								additionalOffset = additionalRotation * startingOffset;
+								startingOffset = additionalOffset;
+								_myTransform.position = Vector3.Lerp ((target.position + startingOffset), (target.position + additionalOffset), 5);
+								
+								// Determines the new viewing angle of the camera. A vector is created between the camera and the pedestrian
+								// which is then used to determine the roation the camera should hold to view the pedestrian. This camera rotation
+								// is then set to this value.
+								relCameraPosition = target.position - _myTransform.position;
+								lookAtRotation = Quaternion.LookRotation (relCameraPosition, Vector3.up);
+								_myTransform.rotation = lookAtRotation;
+								
+								// The newly defined offset must be stored for the next time. 
+								startingOffset = additionalOffset;
+						}
+
+						if (Input.GetKey (KeyCode.D)) {
+				
+								// Will create a new offset, using the current offset and multiplying this by a rotation around the focus
+								// of this offset, in this case the pedestrian. The camera position is then updated to hold this position.
+								additionalRotation = Quaternion.AngleAxis (-1, Vector3.up);
+								additionalOffset = additionalRotation * startingOffset;
+								startingOffset = additionalOffset;
+								_myTransform.position = Vector3.Lerp ((target.position + startingOffset), (target.position + additionalOffset), 5);
+				
+								// Determines the new viewing angle of the camera. A vector is created between the camera and the pedestrian
+								// which is then used to determine the roation the camera should hold to view the pedestrian. This camera rotation
+								// is then set to this value.
+								relCameraPosition = target.position - _myTransform.position;
+								lookAtRotation = Quaternion.LookRotation (relCameraPosition, Vector3.up);
+								_myTransform.rotation = lookAtRotation;
+				
+								// The newly defined offset must be stored for the next time. 
+								startingOffset = additionalOffset;
 						}
 				}
-
-				if (Getswap) {
-						point = target.transform.position;
-						_myTransform.LookAt (point);
 			
-						if (Input.GetKey (KeyCode.E)) {
-								_myTransform.RotateAround (point, new Vector3 (0.0f, 1.0f, 0.0f), 20 * Time.deltaTime * speedMod);
-						}
-				}
-		
-				//private rotation of the camera
-				if (bewegen) {
-						if (Input.GetKey (KeyCode.A))
-								r -= xspeed * factor;
-						else if (Input.GetKey (KeyCode.D))
-								r += xspeed * factor;
-						if (Input.GetKey (KeyCode.W))
-								t -= yspeed * factor;
-						else if (Input.GetKey (KeyCode.S))
-								t += yspeed * factor;
-			
-						t = Mathf.Clamp (t, -90, 35);
-			
-						Quaternion gedoe = Quaternion.Euler (t, r, 0);
-		
-						_myTransform.rotation = gedoe;	
-				}	
-		
 // to be able to move the camera
 				if (manualcamera) {
 						if (Input.GetKey (KeyCode.DownArrow)) {
@@ -126,6 +126,26 @@ public class Camera_Related_Functions : MonoBehaviour
 						}
 						if (Input.GetKey (KeyCode.LeftAlt)) {	
 								_myTransform.position += _myTransform.up * factor * yspeed;
+						}
+						
+
+						if (Input.GetKey (KeyCode.A)) {
+								r -= xspeed * factor;
+								_myTransform.rotation = Quaternion.Slerp (_myTransform.rotation, Quaternion.Euler (t, r, 0), 5);
+						}
+						if (Input.GetKey (KeyCode.D)) {
+								r += xspeed * factor;
+								_myTransform.rotation = Quaternion.Slerp (_myTransform.rotation, Quaternion.Euler (t, r, 0), 5);
+						}
+						if (Input.GetKey (KeyCode.W)) {
+								t -= yspeed * factor;
+								t = Mathf.Clamp (t, -90, 35);
+								_myTransform.rotation = Quaternion.Slerp (_myTransform.rotation, Quaternion.Euler (t, r, 0), 5);
+						}
+						if (Input.GetKey (KeyCode.S)) {
+								t += yspeed * factor;
+								t = Mathf.Clamp (t, -90, 35);
+								_myTransform.rotation = Quaternion.Slerp (_myTransform.rotation, Quaternion.Euler (t, r, 0), 5);
 						}
 
 
@@ -156,24 +176,6 @@ public class Camera_Related_Functions : MonoBehaviour
 						zoomResult = new Vector3 (0f, height, -distance);
 				}
 
-				//private rotation of the camera
-				if (bewegen) {
-						if (Input.GetKey (KeyCode.A))
-								r -= xspeed * factor;
-						else if (Input.GetKey (KeyCode.D))
-								r += xspeed * factor;
-						if (Input.GetKey (KeyCode.W))
-								t -= yspeed * factor;
-						else if (Input.GetKey (KeyCode.S))
-								t += yspeed * factor;
-			
-						t = Mathf.Clamp (t, -90, 35);
-			
-						Quaternion gedoe = Quaternion.Euler (t, r, 0);
-			
-						_myTransform.rotation = gedoe;	
-				}	
-
 				// to be able to move the camera
 				if (manualcamera) {
 						if (Input.GetKey (KeyCode.DownArrow)) {
@@ -194,7 +196,25 @@ public class Camera_Related_Functions : MonoBehaviour
 						if (Input.GetKey (KeyCode.LeftAlt)) {	
 								_myTransform.position += _myTransform.up * factor * yspeed;
 						}
-			
+						
+						if (Input.GetKey (KeyCode.A)) {
+								r -= xspeed * factor;
+								_myTransform.rotation = Quaternion.Slerp (_myTransform.rotation, Quaternion.Euler (t, r, 0), 5);
+						}
+						if (Input.GetKey (KeyCode.D)) {
+								r += xspeed * factor;
+								_myTransform.rotation = Quaternion.Slerp (_myTransform.rotation, Quaternion.Euler (t, r, 0), 5);
+						}
+						if (Input.GetKey (KeyCode.W)) {
+								t -= yspeed * factor;
+								t = Mathf.Clamp (t, -90, 35);
+								_myTransform.rotation = Quaternion.Slerp (_myTransform.rotation, Quaternion.Euler (t, r, 0), 5);
+						}
+						if (Input.GetKey (KeyCode.S)) {
+								t += yspeed * factor;
+								t = Mathf.Clamp (t, -90, 35);
+								_myTransform.rotation = Quaternion.Slerp (_myTransform.rotation, Quaternion.Euler (t, r, 0), 5);
+						}
 			
 				}
 
