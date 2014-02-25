@@ -23,6 +23,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 	private float startTime;
 	private bool setTime = false;
 	
+    // this function instantiates the different global variables.
 	public Movement_Related_Functions(int numberOfPedestrians, int numberOfSteps, double[,] positions, 
 		GameObject prefabBlue, GameObject prefabRed, float rotationSpeed, bool pedestrians)
 	{
@@ -74,6 +75,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 		return spheres;
 	}
 	
+    // This function goes through the entire list of gameobjects and moves them to their next position as well as adjusting their respective rotation.
 	public int moveGameObjects(float threshold, float threshold2, float time, int CamNum, bool resetCounter, List<Transform> spheres, 
 	                           int numberOfPedestrians, int numberOfSteps, double[,] positions, bool pedestrians)
 	{
@@ -83,14 +85,13 @@ public class Movement_Related_Functions : MonoBehaviour {
 			setTime = true;
 		}
 	
-		// For the resetting of the animation
+		// This if statement is used to reset the animation when this is needed.
 		if(resetCounter == true)
 		{			
 			index = 1;
 			resetCounter = false;
 		}
 		
-		// For movement
 		int counter = 0;
 		float startertime = Time.time;
 		while (counter < numberOfPedestrians) {
@@ -102,21 +103,18 @@ public class Movement_Related_Functions : MonoBehaviour {
 				Vector3 tempStart = sphere.transform.position;
 				Vector3 tempNext = sphere.transform.position;
 
-				//For Rotation
 				Vector3 nextlook = sphere.transform.position; // vector variable used to store next position to look at
 
-				//For Rotation
 				Quaternion currotation = sphere.transform.localRotation; // saves the current rotation position
 
-				// Added -3 for the rotation (Means we wont need a separate function for movement and rotation)
-				if (index <= numberOfSteps-4) 
+                if (index <= numberOfSteps - 4) // Added -3 such that the rotation part of the function can be used.
 				{
 					tempStart.x = (float)positions[counter, index - 1];
 					tempStart.z = (float)positions[(counter + numberOfPedestrians), index - 1];
 					tempNext.x = (float)positions [counter, index];
 					tempNext.z = (float)positions [(counter + numberOfPedestrians), index];	
 
-					if(Math.Abs(tempNext.x-tempStart.x) > 2.0f)
+					if(Math.Abs(tempNext.x-tempStart.x) > 2.0f) // When the pedestrian objects move from one side to the other the object will be destroyed (and later be remade)
 					{
 						Destroy(spheres[counter].gameObject);						
 						
@@ -125,7 +123,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 						}
 					}
 					
-					//For Rotation
+					// In order to smoothen the rotation process a rolling average is used.
 					float averagex = ((float)positions [counter , index+1]+
 						(float)positions [counter, index+2]+
 						(float)positions [counter, index+3])/3.0f; // the average value for x is calculated from the next 3 values
@@ -133,7 +131,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 						(float)positions [counter + numberOfPedestrians, index+2]+
 						(float)positions [counter + numberOfPedestrians, index+3])/3.0f; // the average value for y is calculated from the next 3 values
 					
-					//Determine difference in both x and y direction between now and in 3 steps in the future.
+					//Determines the difference in both x and y direction between now and 3 steps in the future.
 					double xdifference = (Math.Abs(positions[counter, index] - positions[ counter, index + 3]));
 					double ydifference = (Math.Abs(positions[counter + numberOfPedestrians, index] - positions[counter, index + 3]));
 					
@@ -152,8 +150,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 	
 					// The rotation is adjusted.
 					sphere.transform.localRotation = nextrotation;
-	
-					
+						
 					//Back to movement of shperes
 					if (spheres[counter]){
 						sphere.transform.position = Vector3.Lerp (tempStart, tempNext, 6*(time - startTime));
