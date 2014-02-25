@@ -5,18 +5,24 @@ using System.Xml.Serialization;
 
 public class WallCreatorWithObstacles : MonoBehaviour 
 {
+    // This class has some nested classes which are used to deserialize the xml file containing geometry information.
+
+    // Nested class where walls are stored
 	public class Wall
 	{
 		public Vector2 Start {get; set; }
 		public Vector2 End {get; set; }
 	}
 	
+    // nested class where obstacles are stored
 	public class Obstacle
 	{
 		public Vector2 Centre {get; set; }
 		public float Diameter {get; set; }
 	}
 	
+    // nested class where geometry is stored. The geometry consists of an array with exterior walls
+    // an array with interior walls, and an array with obstacles.
 	public class Geometry
 	{
 		public Wall[] ExteriorWalls {get; set; }
@@ -24,18 +30,20 @@ public class WallCreatorWithObstacles : MonoBehaviour
 		public Obstacle[] Obstacles {get; set; }
 	}
 	
-	
+	// These game objects are prefabs used to instantiate the geometry
 	public GameObject Floor;
 	public GameObject ExtWall;
 	public GameObject IntWall;
 	public GameObject Obst;
-	public string XMLlocation;
-	private GameObject FloorClone;
-	private GameObject[] ExtWallArray;
-	private GameObject[] IntWallArray;
-	private GameObject[] ObstArray;
-	private Transform tf;
+
+	public string XMLlocation; // the location of the xml file containing geometry information
+	private GameObject FloorClone; // the actual floor
+	private GameObject[] ExtWallArray; // the actual exterior walls
+	private GameObject[] IntWallArray; //  the actual interior walls
+	private GameObject[] ObstArray; // the actual obstacles
+	private Transform tf; // used to transform the walls and obstacles.
 	
+    // constructor. Sets references to the floor prefab, wall prefabs, obstacle prefabs, and xml location.
 	public WallCreatorWithObstacles(GameObject Floor, GameObject ExtWall, GameObject IntWall, GameObject Obst, string XMLlocation)
 	{
 		this.Floor = Floor;
@@ -45,7 +53,7 @@ public class WallCreatorWithObstacles : MonoBehaviour
 		this.XMLlocation = XMLlocation;
 	}
 	
-	
+	// this function actually creates the geometry.
 	public void makeWalls() 
 	{
 		//Read the xml file with geometry information
@@ -56,11 +64,13 @@ public class WallCreatorWithObstacles : MonoBehaviour
 		reader.Close ();
 		
 		// instantiate the floor
+        // first determine the coordinates of the floor. This is done by looking at the cooridnates of all exterior walls.
 		float minX = geometry.ExteriorWalls[0].Start.x;
 		float minY = geometry.ExteriorWalls[0].Start.y;
 		float maxX = geometry.ExteriorWalls[0].Start.x;
 		float maxY = geometry.ExteriorWalls[0].Start.y;
 		
+        // finding the minimal and maximal coordinates
 		for(int i = 0; i < geometry.ExteriorWalls.Length; i++)
 		{
 			minX = Mathf.Min(minX, geometry.ExteriorWalls[i].Start.x);
@@ -73,9 +83,9 @@ public class WallCreatorWithObstacles : MonoBehaviour
 			maxY = Mathf.Max(maxY, geometry.ExteriorWalls[i].Start.y);
 			maxY = Mathf.Max(maxY, geometry.ExteriorWalls[i].End.y);
 		}
-		Instantiate (Floor);
+		Instantiate (Floor); // instantiate the floor
 		FloorClone = GameObject.FindGameObjectWithTag("Floor");
-		tf = FloorClone.GetComponent<Transform>();
+		tf = FloorClone.GetComponent<Transform>(); // transform the floor into the right position, rotation, and scale
 		tf.position = new Vector3((minX + maxX) / 2, 0, (minY + maxY) / 2);
 		tf.localScale = new Vector3((maxX - minX) / 10, tf.localScale.y, (maxY - minY) / 10);
 		
