@@ -41,30 +41,30 @@ public class Movement_Related_Functions : MonoBehaviour {
 	public List<Transform> instantiateGameObjects()
 	{
 		int counter = 0;
-		while (counter < numberOfPedestrians) {
-			if(pedestrians == false)
+		while (counter < numberOfPedestrians) { // For all pedestrians
+			if(pedestrians == false) // If pedestrian mode is off
 			{
-				GameObject sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+				GameObject sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere); // The program creates spheres to represent the pedestrians
 
-				if (counter < numberOfPedestrians /2){
+				if (counter < numberOfPedestrians /2){ // Half of them will be blue
 					sphere.renderer.material.color = Color.blue;
 				}
 				else{
-					sphere.renderer.material.color = Color.red;
+					sphere.renderer.material.color = Color.red; // Half of them will be red
 				}
-
+				// Furthermore a rigidbody is added, the spere is placed on its position and added to the list spheres containing the GameObjects
 				sphere.AddComponent<Rigidbody> ();
 				sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [counter, 0]), Convert.ToInt32 (1.0), Convert.ToInt32 (positions [counter + numberOfPedestrians, 0]));
 				spheres.Add (sphere.transform);
 				}
 			
-			else {
-				if (counter < numberOfPedestrians / 2) {	
+			else { // If pedestrian mode is selected
+				if (counter < numberOfPedestrians / 2) { // Half of the GameObjects is instantiated to be prefabBlue
 					GameObject sphere =(GameObject)Instantiate (prefabBlue);
 					sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [counter, 0]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [counter + numberOfPedestrians, 0]));
 					spheres.Add (sphere.transform);
 				} 
-				else {
+				else { // The other half of the GameObjects is instatiated as prefabRed
 					GameObject sphere = (GameObject)Instantiate (prefabRed);
 					sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [counter, 0]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [counter + numberOfPedestrians, 0]));
 					spheres.Add (sphere.transform);
@@ -94,7 +94,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 		
 		int counter = 0;
 		float startertime = Time.time;
-		while (counter < numberOfPedestrians) {
+		while (counter < numberOfPedestrians) { // For all pedestrians
 			if(spheres[counter]){
 					
 				float realTime = Time.time;
@@ -136,12 +136,9 @@ public class Movement_Related_Functions : MonoBehaviour {
 					double ydifference = (Math.Abs(positions[counter + numberOfPedestrians, index] - positions[counter, index + 3]));
 					
 					// If difference between boundaries then the next rotation position is determined.
-					if (xdifference < 10 || ydifference < 5 )
-					{
-	
+					if (xdifference < 10 || ydifference < 5 ){	
 					nextlook.x = averagex; // x coordinate of the next position to look at is the average of x
 					nextlook.z = averagey; // y coordinate of the next position to look at is the average of y
-					
 					} 
 					else {nextlook = tempNext;}
 					
@@ -169,33 +166,33 @@ public class Movement_Related_Functions : MonoBehaviour {
 			index++;
 			
 			// If a game object has been destroyed then it should be remade at its next position which falls in the range of the playing field. 
-			for(int i = 0; i < numberOfPedestrians; i++)
+			for(int i = 0; i < numberOfPedestrians; i++) // This for loop loops through the list of GameObjects.
 			{
-				if (spheres[i] == null)
+				if (spheres[i] == null) // When the loop encounters an GameObject with value null (a destroyed game object) ...
 				{
-					if(positions[i, index] > 0.0f && positions[i,index] < 120.0f && Math.Abs(positions[i, index] - positions[i, index-1]) < 2.0f)
+					if(positions[i, index] > 0.0f && positions[i,index] < 120.0f && Math.Abs(positions[i, index] - positions[i, index-1]) < 2.0f) // ... and is within the playing field ...
 					{
-						if(pedestrians == false){
+						if(pedestrians == false){ // ... a sphere is created when pedestrians mode was turned off.
 							GameObject sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere);
-							if (i < numberOfPedestrians /2){
+							if (i < numberOfPedestrians /2){ // This if function checks for the color of the object.
 								sphere.renderer.material.color = Color.blue;
 							}
-							else{
+							else{ 
 								sphere.renderer.material.color = Color.red;
 							}
-
-							sphere.AddComponent<Rigidbody> ();
+							// The object is initialized on the right position.
+							sphere.AddComponent<Rigidbody> (); 
 							sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (1.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
-							spheres[i] = sphere.transform;
+							spheres[i] = sphere.transform; // The object is placed in the list with GameObjects
 						}
-						else{
-							if (i < numberOfPedestrians / 2) {	
-								GameObject sphere =(GameObject)Instantiate (prefabBlue);
+						else{ // ... a pedestrian is created when pedestrian mode was on.
+							if (i < numberOfPedestrians / 2) { // The color of the pedestrian model is determined and placed on the playing field.
+								GameObject sphere =(GameObject)Instantiate (prefabBlue); // The blue variant
 								sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
 								spheres[i] = sphere.transform;
 							}
-								else{
-								GameObject sphere = (GameObject)Instantiate (prefabRed);
+								else{ 
+								GameObject sphere = (GameObject)Instantiate (prefabRed); // The red variant
 								sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
 								spheres[i] = sphere.transform;
 							}
