@@ -5,21 +5,26 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Linq;
 
+/* Class is used to extract the positions data from the XML file provided and translate this data into a matrix 
+ * containing the positions of all pedestrians at each time step during the simulation.
+ */
 public class Creation_Of_Positions_Array : MonoBehaviour {
-	
+
+	// Local variables
 	public int numberOfSteps;
 	public int numberOfPedestrians;
 	string positionsFilename;
 	
 	public Creation_Of_Positions_Array(string positionsFilename)
+		// Function caller providing the current class with the XML filename. 
+		// Function is used to transfer data between classes. 
 	{
 		this.positionsFilename = positionsFilename;	
 	}
 
-	
-	// retrieveArraySize is a function that allows us to extract the size of our data array in matlab
-	// so that we will be able to prepare an array of the same proportions to save the actual data into. 
 	public List<string> retrieveArraySize ()
+		// retrieveArraySize is a function that allows us to extract the size of our data array in matlab
+		// so that we will be able to prepare an array of the same proportions to save the actual data into.
 	{
 		// Define doc as an XML file. 
 		XmlDocument doc = new XmlDocument ();
@@ -53,6 +58,8 @@ public class Creation_Of_Positions_Array : MonoBehaviour {
 	}
 	
 	public double[,] createPositionsArray ()
+		// The function createPositionsArray does as its name indicates, it takes the data from the XML file and 
+		// places it into a matrix of positions data. 
 	{
 		// Here we initailize a new array which we will be using to store the output of our function retrieveArraySize.
 		List<string> dataArray = new List<string> ();
@@ -69,24 +76,28 @@ public class Creation_Of_Positions_Array : MonoBehaviour {
 		XmlDocument doc = new XmlDocument ();
 		doc.Load (positionsFilename);
 		
-		//Make a Node variable
+		// Make a Node variable
 		XmlNodeList pedestrians;
 		XmlElement root = doc.DocumentElement;
 		
 		pedestrians = root.SelectNodes ("//Pedestrian_Position");
-		//int numofpeds = pedestrians.Count;
-		
+
+		// Creating the positions matrix.
 		int pedCount = 0;
 		int stepCount = 0; // Will count number of steps performed by each pedestrian so far.
+
+		// Loop through the matrix filling in the data per pedestrian chronologically.
 		while (pedCount < numberOfPedestrians) {
 			while ((stepCount < ((pedCount+1)*numberOfSteps)) && (stepCount >= ((pedCount)*numberOfSteps))) {
 				string id = pedestrians [stepCount].Attributes ["id"].Value;
 				string xpos = pedestrians [stepCount].Attributes ["X"].Value;
 				string ypos = pedestrians [stepCount].Attributes ["Y"].Value;
 				
+				// Parse the obtained data values to the correct format.
 				double xPos = Convert.ToDouble (xpos);
 				double yPos = Convert.ToDouble (ypos);
-				
+
+				// Insert the positions into the positions matrix at the correct position. 
 				positionData [pedCount, (stepCount - (numberOfSteps * pedCount))] = xPos;
 				positionData [(pedCount + numberOfPedestrians), (stepCount - (numberOfSteps * pedCount))] = yPos;
 				
