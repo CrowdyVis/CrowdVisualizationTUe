@@ -23,7 +23,6 @@ public class Movement_Related_Functions : MonoBehaviour {
 	private float startTime;
 	private bool setTime = false;
 	
-    // this function instantiates the different global variables.
 	public Movement_Related_Functions(int numberOfPedestrians, int numberOfSteps, double[,] positions, 
 		GameObject prefabBlue, GameObject prefabRed, float rotationSpeed, bool pedestrians)
 	{
@@ -41,30 +40,31 @@ public class Movement_Related_Functions : MonoBehaviour {
 	public List<Transform> instantiateGameObjects()
 	{
 		int counter = 0;
-		while (counter < numberOfPedestrians) { // For all pedestrians
-			if(pedestrians == false) // If pedestrian mode is off
+		while (counter < numberOfPedestrians) {
+			if(pedestrians == false)
 			{
-				GameObject sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere); // The program creates spheres to represent the pedestrians
+				GameObject sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+				sphere.transform.localScale = new Vector3 ((float) 1.5, (float) 1.5, (float) 1.5);
 
-				if (counter < numberOfPedestrians /2){ // Half of them will be blue
+				if (counter < numberOfPedestrians /2){
 					sphere.renderer.material.color = Color.blue;
 				}
 				else{
-					sphere.renderer.material.color = Color.red; // Half of them will be red
+					sphere.renderer.material.color = Color.red;
 				}
-				// Furthermore a rigidbody is added, the spere is placed on its position and added to the list spheres containing the GameObjects
+
 				sphere.AddComponent<Rigidbody> ();
 				sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [counter, 0]), Convert.ToInt32 (1.0), Convert.ToInt32 (positions [counter + numberOfPedestrians, 0]));
 				spheres.Add (sphere.transform);
 				}
 			
-			else { // If pedestrian mode is selected
-				if (counter < numberOfPedestrians / 2) { // Half of the GameObjects is instantiated to be prefabBlue
+			else {
+				if (counter < numberOfPedestrians / 2) {	
 					GameObject sphere =(GameObject)Instantiate (prefabBlue);
 					sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [counter, 0]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [counter + numberOfPedestrians, 0]));
 					spheres.Add (sphere.transform);
 				} 
-				else { // The other half of the GameObjects is instatiated as prefabRed
+				else {
 					GameObject sphere = (GameObject)Instantiate (prefabRed);
 					sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [counter, 0]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [counter + numberOfPedestrians, 0]));
 					spheres.Add (sphere.transform);
@@ -75,7 +75,6 @@ public class Movement_Related_Functions : MonoBehaviour {
 		return spheres;
 	}
 	
-    // This function goes through the entire list of gameobjects and moves them to their next position as well as adjusting their respective rotation.
 	public int moveGameObjects(float threshold, float threshold2, float time, int CamNum, bool resetCounter, List<Transform> spheres, 
 	                           int numberOfPedestrians, int numberOfSteps, double[,] positions, bool pedestrians)
 	{
@@ -85,16 +84,17 @@ public class Movement_Related_Functions : MonoBehaviour {
 			setTime = true;
 		}
 	
-		// This if statement is used to reset the animation when this is needed.
+		// For the resetting of the animation
 		if(resetCounter == true)
 		{			
 			index = 1;
 			resetCounter = false;
 		}
 		
+		// For movement
 		int counter = 0;
 		float startertime = Time.time;
-		while (counter < numberOfPedestrians) { // For all pedestrians
+		while (counter < numberOfPedestrians) {
 			if(spheres[counter]){
 					
 				float realTime = Time.time;
@@ -103,18 +103,21 @@ public class Movement_Related_Functions : MonoBehaviour {
 				Vector3 tempStart = sphere.transform.position;
 				Vector3 tempNext = sphere.transform.position;
 
+				//For Rotation
 				Vector3 nextlook = sphere.transform.position; // vector variable used to store next position to look at
 
+				//For Rotation
 				Quaternion currotation = sphere.transform.localRotation; // saves the current rotation position
 
-                if (index <= numberOfSteps - 4) // Added -3 such that the rotation part of the function can be used.
+				// Added -3 for the rotation (Means we wont need a separate function for movement and rotation)
+				if (index <= numberOfSteps-4) 
 				{
 					tempStart.x = (float)positions[counter, index - 1];
 					tempStart.z = (float)positions[(counter + numberOfPedestrians), index - 1];
 					tempNext.x = (float)positions [counter, index];
 					tempNext.z = (float)positions [(counter + numberOfPedestrians), index];	
 
-					if(Math.Abs(tempNext.x-tempStart.x) > 2.0f) // When the pedestrian objects move from one side to the other the object will be destroyed (and later be remade)
+					if(Math.Abs(tempNext.x-tempStart.x) > 2.0f)
 					{
 						Destroy(spheres[counter].gameObject);						
 						
@@ -123,7 +126,7 @@ public class Movement_Related_Functions : MonoBehaviour {
 						}
 					}
 					
-					// In order to smoothen the rotation process a rolling average is used.
+					//For Rotation
 					float averagex = ((float)positions [counter , index+1]+
 						(float)positions [counter, index+2]+
 						(float)positions [counter, index+3])/3.0f; // the average value for x is calculated from the next 3 values
@@ -131,14 +134,17 @@ public class Movement_Related_Functions : MonoBehaviour {
 						(float)positions [counter + numberOfPedestrians, index+2]+
 						(float)positions [counter + numberOfPedestrians, index+3])/3.0f; // the average value for y is calculated from the next 3 values
 					
-					//Determines the difference in both x and y direction between now and 3 steps in the future.
+					//Determine difference in both x and y direction between now and in 3 steps in the future.
 					double xdifference = (Math.Abs(positions[counter, index] - positions[ counter, index + 3]));
 					double ydifference = (Math.Abs(positions[counter + numberOfPedestrians, index] - positions[counter, index + 3]));
 					
 					// If difference between boundaries then the next rotation position is determined.
-					if (xdifference < 10 || ydifference < 5 ){	
+					if (xdifference < 10 || ydifference < 5 )
+					{
+	
 					nextlook.x = averagex; // x coordinate of the next position to look at is the average of x
 					nextlook.z = averagey; // y coordinate of the next position to look at is the average of y
+					
 					} 
 					else {nextlook = tempNext;}
 					
@@ -147,7 +153,8 @@ public class Movement_Related_Functions : MonoBehaviour {
 	
 					// The rotation is adjusted.
 					sphere.transform.localRotation = nextrotation;
-						
+	
+					
 					//Back to movement of shperes
 					if (spheres[counter]){
 						sphere.transform.position = Vector3.Lerp (tempStart, tempNext, 6*(time - startTime));
@@ -166,33 +173,35 @@ public class Movement_Related_Functions : MonoBehaviour {
 			index++;
 			
 			// If a game object has been destroyed then it should be remade at its next position which falls in the range of the playing field. 
-			for(int i = 0; i < numberOfPedestrians; i++) // This for loop loops through the list of GameObjects.
+			for(int i = 0; i < numberOfPedestrians; i++)
 			{
-				if (spheres[i] == null) // When the loop encounters an GameObject with value null (a destroyed game object) ...
+				if (spheres[i] == null)
 				{
-					if(positions[i, index] > 0.0f && positions[i,index] < 120.0f && Math.Abs(positions[i, index] - positions[i, index-1]) < 2.0f) // ... and is within the playing field ...
+					if(positions[i, index] > 0.0f && positions[i,index] < 120.0f && Math.Abs(positions[i, index] - positions[i, index-1]) < 2.0f)
 					{
-						if(pedestrians == false){ // ... a sphere is created when pedestrians mode was turned off.
+						if(pedestrians == false){
 							GameObject sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere);
-							if (i < numberOfPedestrians /2){ // This if function checks for the color of the object.
+							sphere.transform.localScale = new Vector3 ((float) 1.5, (float) 1.5, (float) 1.5);
+
+							if (i < numberOfPedestrians /2){
 								sphere.renderer.material.color = Color.blue;
 							}
-							else{ 
+							else{
 								sphere.renderer.material.color = Color.red;
 							}
-							// The object is initialized on the right position.
-							sphere.AddComponent<Rigidbody> (); 
+
+							sphere.AddComponent<Rigidbody> ();
 							sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (1.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
-							spheres[i] = sphere.transform; // The object is placed in the list with GameObjects
+							spheres[i] = sphere.transform;
 						}
-						else{ // ... a pedestrian is created when pedestrian mode was on.
-							if (i < numberOfPedestrians / 2) { // The color of the pedestrian model is determined and placed on the playing field.
-								GameObject sphere =(GameObject)Instantiate (prefabBlue); // The blue variant
+						else{
+							if (i < numberOfPedestrians / 2) {	
+								GameObject sphere =(GameObject)Instantiate (prefabBlue);
 								sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
 								spheres[i] = sphere.transform;
 							}
-								else{ 
-								GameObject sphere = (GameObject)Instantiate (prefabRed); // The red variant
+								else{
+								GameObject sphere = (GameObject)Instantiate (prefabRed);
 								sphere.transform.position = new Vector3 (Convert.ToInt32 (positions [i, index]), Convert.ToInt32 (0.0), Convert.ToInt32 (positions [i + numberOfPedestrians, index]));
 								spheres[i] = sphere.transform;
 							}
